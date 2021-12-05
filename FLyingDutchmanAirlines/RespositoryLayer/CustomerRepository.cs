@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 using FlyingDutchmanAirlines.DatabaseLayer;
 using FlyingDutchmanAirlines.DatabaseLayer.Models;
+using FlyingDutchmanAirlines.Exceptions;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace FlyingDutchmanAirlines.RespositoryLayer
 {
@@ -40,7 +43,7 @@ namespace FlyingDutchmanAirlines.RespositoryLayer
                     _ = await _context.SaveChangesAsync();
                 }
             }
-            catch 
+            catch
             {
                 return false;
             }
@@ -53,5 +56,16 @@ namespace FlyingDutchmanAirlines.RespositoryLayer
             char[] forbiddenCharacters = { '!', '@', '#', '$', '%', '&', '*' };
             return string.IsNullOrEmpty(name) || name.Any(c => forbiddenCharacters.Contains(c));
         }
+
+        /// <summary>
+        /// Return the customer with the given name.
+        /// </summary>
+        /// <param name="name">The custromer name to return.</param>
+        /// <returns>The customer with the given name.</returns>
+        /// <exception cref="CustomerNotFoundException"><paramref name="name"/> was invalid or not found.</exception>
+        public async Task<Customer> GetCustomerByName(string name)
+            => IsInvalidCustomerName(name)
+                ? throw new CustomerNotFoundException()
+                : await _context.Customers.FirstOrDefaultAsync(c => c.Name == name) ?? throw new CustomerNotFoundException();
     }
 }
