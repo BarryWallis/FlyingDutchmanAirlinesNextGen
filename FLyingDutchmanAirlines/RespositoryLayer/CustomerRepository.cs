@@ -63,7 +63,7 @@ public class CustomerRepository
     /// <param name="name">The custromer name to return.</param>
     /// <returns>The customer with the given name.</returns>
     /// <exception cref="CustomerNotFoundException"><paramref name="name"/> was invalid or not found.</exception>
-    public async Task<Customer> GetCustomerByName(string name)
+    public async Task<Customer> GetCustomerByNameAsync(string name)
         => IsInvalidCustomerName(name)
             ? throw new CustomerNotFoundException()
             : await _context.Customers.FirstOrDefaultAsync(c => c.Name == name) ?? throw new CustomerNotFoundException();

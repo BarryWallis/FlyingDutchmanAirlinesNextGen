@@ -18,19 +18,26 @@ public class BookingRepository
     /// Create a new booking repository.
     /// </summary>
     /// <param name="context">The dastabase context to use for the bookings.</param>
-    /// <exception cref="CouldNotAddBookingToDatabaseException">Unable to add booking to database.</exception>
     public BookingRepository(FlyingDutchmanAirlinesContext context) => _context = context;
 
-    public async Task CreateBooking(int customerId, int flightNumber)
+    /// <summary>
+    /// Create a new booking.
+    /// </summary>
+    /// <param name="customerId">The customer id for the booking.</param>
+    /// <param name="flightNumber">The flight number for the booking.</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException">Custimer id or flight number are negative.</exception>
+    /// <exception cref="CouldNotAddBookingToDatabaseException">Unable to add booking to database.</exception>
+    public async Task CreateBookingAsync(int customerId, int flightNumber)
     {
-        if (customerId < 0)
+        if (customerId.IsNegative())
         {
-            Console.WriteLine($"{nameof(customerId)} out of range in {nameof(CreateBooking)}: {customerId}");
+            Console.WriteLine($"{nameof(customerId)} out of range in {nameof(CreateBookingAsync)}: {customerId}");
             throw new ArgumentOutOfRangeException(nameof(customerId), "Must be non-negtive.");
         }
-        if (flightNumber < 0)
+        if (flightNumber.IsNegative())
         {
-            Console.WriteLine($"{nameof(flightNumber)} out of range in {nameof(CreateBooking)}: {flightNumber}");
+            Console.WriteLine($"{nameof(flightNumber)} out of range in {nameof(CreateBookingAsync)}: {flightNumber}");
             throw new ArgumentOutOfRangeException(nameof(flightNumber), "Must be non-negative.");
         }
 

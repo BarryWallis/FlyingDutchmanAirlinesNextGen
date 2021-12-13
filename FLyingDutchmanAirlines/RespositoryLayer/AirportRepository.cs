@@ -1,0 +1,49 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using FlyingDutchmanAirlines.DatabaseLayer;
+using FlyingDutchmanAirlines.DatabaseLayer.Models;
+using FlyingDutchmanAirlines.Exceptions;
+
+using Microsoft.EntityFrameworkCore;
+
+namespace FlyingDutchmanAirlines.RespositoryLayer
+{
+    public class AirportRepository
+    {
+        private readonly FlyingDutchmanAirlinesContext _context;
+
+        /// <summary>
+        /// Create a new airport repository.
+        /// </summary>
+        /// <param name="context">The dastabase context to use for the airports.</param>
+        public AirportRepository(FlyingDutchmanAirlinesContext context) => _context = context;
+
+        /// <summary>
+        /// Return the airport with the given id.
+        /// </summary>
+        /// <param name="airportId">The airport id to return.</param>
+        /// <returns>The airport with the given id.</returns>
+        /// <exception cref="AirportNotFoundException">The <paramref name="airportId"/> is invalid or not found.</exception>
+        public async Task<Airport> GetAirportByIdAsync(int airportId)
+        {
+            if (airportId.IsNegative())
+            {
+                Console.WriteLine($"Argument out of range exception: {nameof(airportId)} = {airportId}");
+                throw new ArgumentOutOfRangeException(nameof(airportId));
+            }
+
+            Airport? airport = await _context.Airports.FirstOrDefaultAsync(a => a.AirportId == airportId);
+            if (airport is null)
+            {
+                Console.WriteLine($"Airport not found exception: {nameof(airportId)} = {airportId}");
+                throw new AirportNotFoundException();
+            }
+
+            return airport;
+        }
+    }
+}

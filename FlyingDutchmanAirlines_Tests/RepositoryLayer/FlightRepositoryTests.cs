@@ -10,7 +10,6 @@ using FlyingDutchmanAirlines.DatabaseLayer;
 using FlyingDutchmanAirlines.DatabaseLayer.Models;
 using FlyingDutchmanAirlines.Exceptions;
 using FlyingDutchmanAirlines.RespositoryLayer;
-
 using FlyingDutchmanAirlines_Tests.Stubs;
 
 using Microsoft.EntityFrameworkCore;
@@ -19,79 +18,108 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace FlyingDutchmanAirlines_Tests.RepositoryLayer;
 
 [TestClass]
-public class BookingRepositoryTests : IDisposable
+public class FlightRepositoryTests : IDisposable
 {
+    private const int FlightNumber = 1;
+    private const int OriginAirportId = 1;
+    private const int DestinationAirportId = 2;
+
     private FlyingDutchmanAirlinesContext? _context;
-    private BookingRepository? _repository;
+    private FlightRepository? _repository;
     private bool _disposedValue;
 
     [TestInitialize]
-    public void TestInitialize()
+    public async Task TestInitializeAsync()
     {
-        DbContextOptions<FlyingDutchmanAirlinesContext> dbContextOptions 
+        DbContextOptions<FlyingDutchmanAirlinesContext> dbContextOptions
             = new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>().UseInMemoryDatabase("FlyingDutchman").Options;
         _context = new FlyingDutchmanAirlinesContext_Stub(dbContextOptions);
+
+        Flight flight = new() { FlightNumber = FlightNumber, Origin = OriginAirportId, Destination = DestinationAirportId };
+        _ = _context.Flights.Add(flight);
+        int numberOfChanges = await _context.SaveChangesAsync();
+        Assert.AreEqual(1, numberOfChanges);
 
         _repository = new(_context);
         Assert.IsNotNull(_repository);
     }
 
     [TestMethod]
-    public async Task CreateBooking_SuccessAsync()
+    public async Task GetFlightByFlightNumber_SuccessAsync()
     {
         Debug.Assert(_repository is not null);
-        await _repository.CreateBookingAsync(1, 0);
+        Flight flight = await _repository.GetFlightByFlightNumberAsync(FlightNumber, OriginAirportId, DestinationAirportId);
+        Assert.IsNotNull(flight);
 
         Debug.Assert(_context is not null);
-        Booking booking = _context.Bookings.First();
+        Flight? databaseFlight = _context.Flights.FirstOrDefault(f=> f.FlightNumber == FlightNumber);
+        Assert.IsNotNull(databaseFlight);
 
-        Assert.IsNotNull(booking);
-        Assert.AreEqual(1, booking.CustomerId);
-        Assert.AreEqual(0, booking.FlightNumber);
+        Assert.AreEqual(databaseFlight.FlightNumber, flight.FlightNumber);
+        Assert.AreEqual(databaseFlight.Origin, flight.Origin);
+        Assert.AreEqual(databaseFlight.Destination, flight.Destination);
     }
 
     [TestMethod]
     [ExpectedException(typeof(ArgumentOutOfRangeException))]
-    public async Task CreateBooking_Failure_InvalidCuatomerIdAsync()
+    public async Task GetFlightByFlightNumber_Failure_InvalidFlightNumberAsync()
     {
         StringWriter output = new();
         try
         {
             Console.SetOut(output);
             Debug.Assert(_repository is not null);
-            await _repository.CreateBookingAsync(-1, 0);
+            _ = await _repository.GetFlightByFlightNumberAsync(-1, 0, 0);
         }
         catch (ArgumentOutOfRangeException)
         {
-            Assert.IsTrue(output.ToString().Contains("customerId out of range in CreateBookingAsync: -1"));
+            Assert.IsTrue(output.ToString().Contains("flightNumber out of range in GetFlightByFlightNumberAsync: -1"));
             throw;
         }
     }
 
     [TestMethod]
     [ExpectedException(typeof(ArgumentOutOfRangeException))]
-    public async Task CreateBooking_Failure_InvalidFlightNumberAsync()
+    public async Task GetFlightByFlightNumber_Failure_InvalidOriginaAirportIdAsync()
     {
         StringWriter output = new();
         try
         {
             Console.SetOut(output);
             Debug.Assert(_repository is not null);
-            await _repository.CreateBookingAsync(0, -1);
+            _ = await _repository.GetFlightByFlightNumberAsync(0, -1, 0);
         }
         catch (ArgumentOutOfRangeException)
         {
-            Assert.IsTrue(output.ToString().Contains("flightNumber out of range in CreateBookingAsync: -1"));
+            Assert.IsTrue(output.ToString().Contains("originAirportId out of range in GetFlightByFlightNumberAsync: -1"));
             throw;
         }
     }
 
     [TestMethod]
-    [ExpectedException(typeof(CouldNotAddBookingToDatabaseException))]
-    public async Task CreateBooking_Failure_DatabaseErrorAsync()
+    [ExpectedException(typeof(ArgumentOutOfRangeException))]
+    public async Task GetFlightByFlightNumber_Failure_InvalidDestinationAirportIdAsync()
+    {
+        StringWriter output = new();
+        try
+        {
+            Console.SetOut(output);
+            Debug.Assert(_repository is not null);
+            _ = await _repository.GetFlightByFlightNumberAsync(0, 0, -1);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            Assert.IsTrue(output.ToString().Contains("destinationAirportId out of range in GetFlightByFlightNumberAsync: -1"));
+            throw;
+        }
+    }
+
+    [TestMethod]
+    [ExpectedException(typeof(FlightNotFoundException))]
+    public async Task GetFlightByFlightNumber_Failure_FlightNotFoundExceptionAsync()
     {
         Debug.Assert(_repository is not null);
-        await _repository.CreateBookingAsync(0, 1);
+        _ = await _repository.GetFlightByFlightNumberAsync(2, 1, 2);
     }
 
     #region Dispose

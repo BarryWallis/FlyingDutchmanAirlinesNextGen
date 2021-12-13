@@ -22,7 +22,7 @@ public class CustomerRepositoryTests : IDisposable
     private bool _disposedValue;
 
     [TestInitialize]
-    public async Task TestInitialize()
+    public async Task TestInitializeAsync()
     {
         DbContextOptions<FlyingDutchmanAirlinesContext> dbContextOptions =
             new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>().UseInMemoryDatabase("FlyingDutchman").Options;
@@ -54,7 +54,7 @@ public class CustomerRepositoryTests : IDisposable
     }
 
     [TestMethod]
-    public async Task CreateCustomer_Failure_NameIsNull()
+    public async Task CreateCustomer_Failure_NameIsNullAsync()
     {
         Debug.Assert(_repository is not null);
         bool result = await _repository.CreateCustomerAsync(null!);
@@ -86,7 +86,7 @@ public class CustomerRepositoryTests : IDisposable
     public async Task GetCustomerByName_SuccessAsync()
     {
         Debug.Assert(_repository is not null);
-        Customer customer = await _repository.GetCustomerByName(TestCustomerName);
+        Customer customer = await _repository.GetCustomerByNameAsync(TestCustomerName);
         Assert.IsNotNull(customer);
 
         Debug.Assert(_context is not null);
@@ -103,10 +103,10 @@ public class CustomerRepositoryTests : IDisposable
     [DataRow("&")]
     [DataRow("*")]
     [ExpectedException(typeof(CustomerNotFoundException))]
-    public async Task GetCustomerByName_Failure_InvalidName(string name)
+    public async Task GetCustomerByName_Failure_InvalidNameAsync(string name)
     {
         Debug.Assert(_repository is not null);
-        _ = await _repository.GetCustomerByName(name);
+        _ = await _repository.GetCustomerByNameAsync(name);
     }
 
     protected virtual void Dispose(bool disposing)
