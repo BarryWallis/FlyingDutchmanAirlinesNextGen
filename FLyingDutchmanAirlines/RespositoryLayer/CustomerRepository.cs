@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +17,20 @@ namespace FlyingDutchmanAirlines.RespositoryLayer;
 
 public class CustomerRepository
 {
-    private readonly FlyingDutchmanAirlinesContext _context;
+    private readonly FlyingDutchmanAirlinesContext? _context;
+
+    /// <summary>
+    /// Create a new customer repository without injecting a context. This should only be used during testing.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">This constructor was called from the production assembly.</exception>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public CustomerRepository()
+    {
+        if (Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+        {
+            throw new InvalidOperationException("This constructor should only be used for testing.");
+        }
+    }
 
     /// <summary>
     /// Create a new customer repository.
@@ -39,6 +55,7 @@ public class CustomerRepository
             Customer customer = new(name);
             using (_context)
             {
+                Debug.Assert(_context is not null);
                 _ = _context.Customers.Add(customer);
                 _ = await _context.SaveChangesAsync();
             }
@@ -63,8 +80,11 @@ public class CustomerRepository
     /// <param name="name">The custromer name to return.</param>
     /// <returns>The customer with the given name.</returns>
     /// <exception cref="CustomerNotFoundException"><paramref name="name"/> was invalid or not found.</exception>
-    public async Task<Customer> GetCustomerByNameAsync(string name)
-        => IsInvalidCustomerName(name)
-            ? throw new CustomerNotFoundException()
-            : await _context.Customers.FirstOrDefaultAsync(c => c.Name == name) ?? throw new CustomerNotFoundException();
+    public virtual async Task<Customer> GetCustomerByNameAsync(string name)
+    {
+        Debug.Assert(_context is not null); 
+        return IsInvalidCustomerName(name)
+                   ? throw new CustomerNotFoundException()
+                   : await _context.Customers.FirstOrDefaultAsync(c => c.Name == name) ?? throw new CustomerNotFoundException();
+    }
 }

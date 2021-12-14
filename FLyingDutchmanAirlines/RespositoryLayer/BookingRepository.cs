@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,7 +15,20 @@ namespace FlyingDutchmanAirlines.RespositoryLayer;
 
 public class BookingRepository
 {
-    private readonly FlyingDutchmanAirlinesContext _context;
+    private readonly FlyingDutchmanAirlinesContext? _context;
+
+    /// <summary>
+    /// Create a new booking repository without injecting a context. This should only be used during testing.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">This constructor was called from the production assembly.</exception>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public BookingRepository()
+    {
+        if (Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+        {
+            throw new InvalidOperationException("This constructor should only be used for testing.");
+        }
+    }
 
     /// <summary>
     /// Create a new booking repository.
@@ -28,7 +44,7 @@ public class BookingRepository
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException">Custimer id or flight number are negative.</exception>
     /// <exception cref="CouldNotAddBookingToDatabaseException">Unable to add booking to database.</exception>
-    public async Task CreateBookingAsync(int customerId, int flightNumber)
+    public virtual async Task CreateBookingAsync(int customerId, int flightNumber)
     {
         if (customerId.IsNegative())
         {
@@ -45,6 +61,7 @@ public class BookingRepository
 
         try
         {
+            Debug.Assert(_context is not null);
             _ = _context.Bookings.Add(booking);
             _ = await _context.SaveChangesAsync();
         }
