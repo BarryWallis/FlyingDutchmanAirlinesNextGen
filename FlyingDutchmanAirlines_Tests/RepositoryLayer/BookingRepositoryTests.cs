@@ -52,7 +52,7 @@ public class BookingRepositoryTests : IDisposable
 
     [TestMethod]
     [ExpectedException(typeof(ArgumentOutOfRangeException))]
-    public async Task CreateBooking_Failure_InvalidCuatomerIdAsync()
+    public async Task CreateBooking_Failure_InvalidCustomerIdAsync()
     {
         StringWriter output = new();
         try

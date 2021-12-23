@@ -48,7 +48,7 @@ public class FlightRepositoryTests : IDisposable
     public async Task GetFlightByFlightNumber_SuccessAsync()
     {
         Debug.Assert(_repository is not null);
-        Flight flight = await _repository.GetFlightByFlightNumberAsync(FlightNumber, OriginAirportId, DestinationAirportId);
+        Flight flight = await _repository.GetFlightByFlightNumberAsync(FlightNumber);
         Assert.IsNotNull(flight);
 
         Debug.Assert(_context is not null);
@@ -69,7 +69,7 @@ public class FlightRepositoryTests : IDisposable
         {
             Console.SetOut(output);
             Debug.Assert(_repository is not null);
-            _ = await _repository.GetFlightByFlightNumberAsync(-1, 0, 0);
+            _ = await _repository.GetFlightByFlightNumberAsync(-1);
         }
         catch (ArgumentOutOfRangeException)
         {
@@ -78,48 +78,48 @@ public class FlightRepositoryTests : IDisposable
         }
     }
 
-    [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
-    public async Task GetFlightByFlightNumber_Failure_InvalidOriginaAirportIdAsync()
-    {
-        StringWriter output = new();
-        try
-        {
-            Console.SetOut(output);
-            Debug.Assert(_repository is not null);
-            _ = await _repository.GetFlightByFlightNumberAsync(0, -1, 0);
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            Assert.IsTrue(output.ToString().Contains("originAirportId out of range in GetFlightByFlightNumberAsync: -1"));
-            throw;
-        }
-    }
+    //[TestMethod]
+    //[ExpectedException(typeof(ArgumentOutOfRangeException))]
+    //public async Task GetFlightByFlightNumber_Failure_InvalidOriginaAirportIdAsync()
+    //{
+    //    StringWriter output = new();
+    //    try
+    //    {
+    //        Console.SetOut(output);
+    //        Debug.Assert(_repository is not null);
+    //        _ = await _repository.GetFlightByFlightNumberAsync(0);
+    //    }
+    //    catch (ArgumentOutOfRangeException)
+    //    {
+    //        Assert.IsTrue(output.ToString().Contains("originAirportId out of range in GetFlightByFlightNumberAsync: -1"));
+    //        throw;
+    //    }
+    //}
 
-    [TestMethod]
-    [ExpectedException(typeof(ArgumentOutOfRangeException))]
-    public async Task GetFlightByFlightNumber_Failure_InvalidDestinationAirportIdAsync()
-    {
-        StringWriter output = new();
-        try
-        {
-            Console.SetOut(output);
-            Debug.Assert(_repository is not null);
-            _ = await _repository.GetFlightByFlightNumberAsync(0, 0, -1);
-        }
-        catch (ArgumentOutOfRangeException)
-        {
-            Assert.IsTrue(output.ToString().Contains("destinationAirportId out of range in GetFlightByFlightNumberAsync: -1"));
-            throw;
-        }
-    }
+    //[TestMethod]
+    //[ExpectedException(typeof(ArgumentOutOfRangeException))]
+    //public async Task GetFlightByFlightNumber_Failure_InvalidDestinationAirportIdAsync()
+    //{
+    //    StringWriter output = new();
+    //    try
+    //    {
+    //        Console.SetOut(output);
+    //        Debug.Assert(_repository is not null);
+    //        _ = await _repository.GetFlightByFlightNumberAsync(0);
+    //    }
+    //    catch (ArgumentOutOfRangeException)
+    //    {
+    //        Assert.IsTrue(output.ToString().Contains("destinationAirportId out of range in GetFlightByFlightNumberAsync: -1"));
+    //        throw;
+    //    }
+    //}
 
     [TestMethod]
     [ExpectedException(typeof(FlightNotFoundException))]
     public async Task GetFlightByFlightNumber_Failure_FlightNotFoundExceptionAsync()
     {
         Debug.Assert(_repository is not null);
-        _ = await _repository.GetFlightByFlightNumberAsync(2, 1, 2);
+        _ = await _repository.GetFlightByFlightNumberAsync(2);
     }
 
     #region Dispose

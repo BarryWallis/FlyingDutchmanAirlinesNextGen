@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,7 +17,20 @@ namespace FlyingDutchmanAirlines.RespositoryLayer;
 
 public class FlightRepository
 {
-    private readonly FlyingDutchmanAirlinesContext _context;
+    private readonly FlyingDutchmanAirlinesContext? _context;
+
+    /// <summary>
+    /// Create a new flight repository without injecting a context. This should only be used during testing.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">This constructor was called from the production assembly.</exception>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public FlightRepository()
+    {
+        if (Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+        {
+            throw new InvalidOperationException("This constructor should only be used for testing.");
+        }
+    }
 
     /// <summary>
     /// Create a new flight repository.
@@ -27,28 +43,18 @@ public class FlightRepository
     /// Get flight information from the repository.
     /// </summary>
     /// <param name="flightNumber">The flight number of the flight.</param>
-    /// <param name="originAirportId">The origin airport ID of the flight.</param>
-    /// <param name="destinationAirportId">The destination airport ID of the flight.</param>
     /// <returns>The flight.</returns>
-    public async Task<Flight> GetFlightByFlightNumberAsync(int flightNumber, int originAirportId, int destinationAirportId)
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="flightNumber"/> is out of range. Must be non-negative.</exception>
+    /// <exception cref="FlightNotFoundException"><paramref name="flightNumber"/> was not found in database.</exception>
+    public virtual async Task<Flight> GetFlightByFlightNumberAsync(int flightNumber)
     {
         if (flightNumber.IsNegative())
         {
             Console.WriteLine($"{nameof(flightNumber)} out of range in {nameof(GetFlightByFlightNumberAsync)}: {flightNumber}");
             throw new ArgumentOutOfRangeException(nameof(flightNumber));
         }
-        if (originAirportId.IsNegative())
-        {
-            Console.WriteLine($"{nameof(originAirportId)} out of range in {nameof(GetFlightByFlightNumberAsync)}: {originAirportId}");
-            throw new ArgumentOutOfRangeException(nameof(originAirportId));
-        }
-        if (destinationAirportId.IsNegative())
-        {
-            Console.WriteLine($"{nameof(destinationAirportId)} out of range in {nameof(GetFlightByFlightNumberAsync)}: " +
-                $"{destinationAirportId}");
-            throw new ArgumentOutOfRangeException(nameof(destinationAirportId));
-        }
 
+        Debug.Assert(_context is not null);
         return await _context.Flights.FirstOrDefaultAsync(f => f.FlightNumber == flightNumber) ?? throw new FlightNotFoundException();
     }
 }

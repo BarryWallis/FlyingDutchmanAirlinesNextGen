@@ -43,7 +43,7 @@ public class CustomerRepository
     /// </summary>
     /// <param name="name">The customer name.</param>
     /// <returns><see langword="true"/> on success; <see langword="false"/> on failure.</returns>
-    public async Task<bool> CreateCustomerAsync(string name)
+    public virtual async Task<bool> CreateCustomerAsync(string name)
     {
         if (IsInvalidCustomerName(name))
         {
