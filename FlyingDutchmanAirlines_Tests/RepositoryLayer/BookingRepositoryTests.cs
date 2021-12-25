@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using FlyingDutchmanAirlines.DatabaseLayer;
@@ -28,7 +26,7 @@ public class BookingRepositoryTests : IDisposable
     [TestInitialize]
     public void TestInitialize()
     {
-        DbContextOptions<FlyingDutchmanAirlinesContext> dbContextOptions 
+        DbContextOptions<FlyingDutchmanAirlinesContext> dbContextOptions
             = new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>().UseInMemoryDatabase("FlyingDutchman").Options;
         _context = new FlyingDutchmanAirlinesContext_Stub(dbContextOptions);
 

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using FlyingDutchmanAirlines.DatabaseLayer;
 using FlyingDutchmanAirlines.DatabaseLayer.Models;
@@ -82,7 +77,7 @@ public class CustomerRepository
     /// <exception cref="CustomerNotFoundException"><paramref name="name"/> was invalid or not found.</exception>
     public virtual async Task<Customer> GetCustomerByNameAsync(string name)
     {
-        Debug.Assert(_context is not null); 
+        Debug.Assert(_context is not null);
         return IsInvalidCustomerName(name)
                    ? throw new CustomerNotFoundException()
                    : await _context.Customers.FirstOrDefaultAsync(c => c.Name == name) ?? throw new CustomerNotFoundException();

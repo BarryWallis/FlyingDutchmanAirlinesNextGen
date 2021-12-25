@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +22,7 @@ internal class FlyingDutchmanAirlinesContext_Stub : FlyingDutchmanAirlinesContex
         => base.Database.EnsureDeleted();
 
     /// <inheritdoc/>
-    public async override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         IEnumerable<EntityEntry>? pendingChanges = ChangeTracker.Entries()
                                                                 .Where(e => e.State == EntityState.Added);
@@ -35,8 +34,8 @@ internal class FlyingDutchmanAirlinesContext_Stub : FlyingDutchmanAirlinesContex
             throw new Exception("Database Error!");
         }
 
-        IEnumerable<Airport> airports = pendingChanges.Select(e=>e.Entity).OfType<Airport>();
-        return airports.Any(a =>a.AirportId == 10) ? throw new Exception("Database Error!") : await base.SaveChangesAsync(cancellationToken);
+        IEnumerable<Airport> airports = pendingChanges.Select(e => e.Entity).OfType<Airport>();
+        return airports.Any(a => a.AirportId == 10) ? throw new Exception("Database Error!") : await base.SaveChangesAsync(cancellationToken);
 #pragma warning restore CA2201 // Do not raise reserved exception types
     }
 }

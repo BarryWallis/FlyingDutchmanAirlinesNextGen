@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 namespace FlyingDutchmanAirlines;
 
-class Program
+internal class Program
 {
-    static void Main() => InitializeHost();
+    private static void Main() => InitializeHost();
 
     private static void InitializeHost() =>
         Host.CreateDefaultBuilder()

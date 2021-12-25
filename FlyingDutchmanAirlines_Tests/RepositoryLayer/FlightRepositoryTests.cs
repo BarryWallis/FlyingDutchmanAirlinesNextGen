@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 using FlyingDutchmanAirlines.DatabaseLayer;
 using FlyingDutchmanAirlines.DatabaseLayer.Models;
 using FlyingDutchmanAirlines.Exceptions;
 using FlyingDutchmanAirlines.RespositoryLayer;
+
 using FlyingDutchmanAirlines_Tests.Stubs;
 
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +51,7 @@ public class FlightRepositoryTests : IDisposable
         Assert.IsNotNull(flight);
 
         Debug.Assert(_context is not null);
-        Flight? databaseFlight = _context.Flights.FirstOrDefault(f=> f.FlightNumber == FlightNumber);
+        Flight? databaseFlight = _context.Flights.FirstOrDefault(f => f.FlightNumber == FlightNumber);
         Assert.IsNotNull(databaseFlight);
 
         Assert.AreEqual(databaseFlight.FlightNumber, flight.FlightNumber);

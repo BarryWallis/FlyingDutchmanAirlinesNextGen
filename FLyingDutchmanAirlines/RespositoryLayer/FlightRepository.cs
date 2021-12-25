@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 using FlyingDutchmanAirlines.DatabaseLayer;
 using FlyingDutchmanAirlines.DatabaseLayer.Models;
@@ -56,5 +51,17 @@ public class FlightRepository
 
         Debug.Assert(_context is not null);
         return await _context.Flights.FirstOrDefaultAsync(f => f.FlightNumber == flightNumber) ?? throw new FlightNotFoundException();
+    }
+
+    /// <summary>
+    /// Return all the flights in the database.
+    /// </summary>
+    /// <returns>All the flights in the database.</returns>
+    public virtual async Task<Queue<Flight>> GetFlightsAsync()
+    {
+        Queue<Flight> flights = new();
+        Debug.Assert(_context is not null);
+        await _context.Flights.ForEachAsync(f => flights.Enqueue(f));
+        return flights;
     }
 }
