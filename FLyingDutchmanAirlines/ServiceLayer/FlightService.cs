@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 using FlyingDutchmanAirlines.DatabaseLayer.Models;
 using FlyingDutchmanAirlines.Exceptions;
@@ -9,8 +12,21 @@ namespace FlyingDutchmanAirlines.ServiceLayer;
 
 public class FlightService
 {
-    private readonly FlightRepository _flightRepository;
-    private readonly AirportRepository _airportRepository;
+    private readonly FlightRepository? _flightRepository;
+    private readonly AirportRepository? _airportRepository;
+
+    /// <summary>
+    /// Create a new flight service without injecting a context. This should only be used during testing.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">This constructor was called from the production assembly.</exception>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public FlightService()
+    {
+        if (Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+        {
+            throw new InvalidOperationException("This constructor should only be used for testing.");
+        }
+    }
 
     public FlightService(FlightRepository flightRepository, AirportRepository airportRepository)
     {
@@ -24,8 +40,9 @@ public class FlightService
     /// <returns>The queue of all the flights.</returns>
     /// <exception cref="FlightNotFoundException">A flight in the database has no corresponding information.</exception>
     /// <exception cref="ArgumentException">An unexpected error was encountered.</exception>
-    public async IAsyncEnumerable<FlightView> GetFlightsAsync()
+    public virtual async IAsyncEnumerable<FlightView> GetFlightsAsync()
     {
+        Debug.Assert(_flightRepository is not null);
         Queue<Flight> flights = await _flightRepository.GetFlightsAsync();
         foreach (Flight flight in flights)
         {
@@ -37,6 +54,7 @@ public class FlightService
 
             try
             {
+                Debug.Assert(_airportRepository is not null);
                 originAirport = await _airportRepository.GetAirportByIdAsync(flight.Origin);
                 originAirportInfo = new AirportInfo() { City = originAirport.City, Code = originAirport.Iata };
                 destinationAirport = await _airportRepository.GetAirportByIdAsync(flight.Destination);
@@ -66,7 +84,10 @@ public class FlightService
     {
         try
         {
+            Debug.Assert(_flightRepository is not null);
             Flight flight = await _flightRepository.GetFlightByFlightNumberAsync(flightNumber);
+
+            Debug.Assert(_airportRepository is not null);
             Airport originAirport = await _airportRepository.GetAirportByIdAsync(flight.Origin);
             Airport destinationAirport = await _airportRepository.GetAirportByIdAsync(flight.Destination);
 
