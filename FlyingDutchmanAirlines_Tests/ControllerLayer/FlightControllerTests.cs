@@ -88,14 +88,14 @@ public class FlightControllerTests
     public async Task GetFlightByFlightNumber_SuccesssAsync()
     {
         Mock<FlightService> flightService = new();
-        FlightView flightView = new("0", 
+        FlightView flightView = new("1", 
                                     new AirportInfo("Lagos", "LOS"), 
                                     new AirportInfo("Marrakesh", "RAK"));
-        _ = flightService.Setup(fs => fs.GetFlightByFlightNumberAsync(0))
+        _ = flightService.Setup(fs => fs.GetFlightByFlightNumberAsync(1))
                          .Returns(Task.FromResult(flightView));
         FlightController flightController = new(flightService.Object);
 
-        ObjectResult? objectResult = await flightController.GetFlightByFlightNumberAsync(0) as ObjectResult;
+        ObjectResult? objectResult = await flightController.GetFlightByFlightNumberAsync(1) as ObjectResult;
 
         Assert.IsNotNull(objectResult);
         Assert.AreEqual((int)HttpStatusCode.OK, objectResult.StatusCode);
